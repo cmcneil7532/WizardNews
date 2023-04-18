@@ -12,11 +12,19 @@ app.use(express.static("public"));
 app.get("/", (req, res) => {
   res.send(postList(list));
 });
-app.get("/posts/:id", (req, res) => {
+app.get("/posts/:id", (req, res, next) => {
   const post = find(req.params.id);
-  res.send(postDetail(post));
+  if (!post.id) {
+    res.status(404); //status code 404
+    next("<h1>404 page not found</h1>"); //Pass tag to error handler
+  } else {
+    res.send(postDetail(post));
+  }
 });
 
+app.use((err, req, res, next) => {
+  res.send(err); //send the client a 404 page not found
+});
 const { PORT = 1337 } = process.env;
 
 app.listen(PORT, () => {
